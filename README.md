@@ -61,7 +61,16 @@ Puis supprimer le bloc `Stop` dans `~/.claude/settings.json`.
 
 ## Renommage
 
-Ce projet s'appelait `claude-code-vscode-notifier`. Le `vscode` venait du contexte d'origine et laissait croire à une dépendance à l'éditeur, alors que le hook fonctionne partout où tourne Claude Code. La formule Homebrew déclare l'ancien nom via `oldname` : les installations existantes se mettent à jour sans intervention.
+Ce projet s'appelait `claude-code-vscode-notifier`. Le `vscode` venait du contexte d'origine et laissait croire à une dépendance à l'éditeur, alors que le hook fonctionne partout où tourne Claude Code.
+
+Le tap déclare le renommage dans `formula_renames.json`. Pour migrer une installation existante :
+
+```bash
+brew update
+brew migrate claude-code-vscode-notifier
+```
+
+Homebrew déplace le keg et relie le nouveau nom, en laissant l'ancien chemin `opt` en symlink - un hook qui pointe encore sur `/opt/homebrew/opt/claude-code-vscode-notifier/...` continue donc de fonctionner.
 
 ## Licence
 
