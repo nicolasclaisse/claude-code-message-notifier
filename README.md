@@ -1,37 +1,68 @@
-# claude-code-vscode-notifier
+# claude-code-message-notifier
 
-Notifications macOS pour Claude Code (VS Code) qui affichent **le contenu du dernier message** — pas juste "Task completed".
+Notifications macOS pour Claude Code qui affichent **le contenu du dernier message** - pas juste "Task completed".
 
 ```
 Claude Code
 "Voici les fichiers modifiés : auth.ts, user.servic…"
 ```
 
+Si le message se termine par une question, la notification est préfixée par "Attends ton input" - on sait au coup d'œil s'il faut revenir ou non.
+
+## Pourquoi celui-là
+
+Les notifieurs pour Claude Code sont nombreux. Ils signalent tous **qu'un événement a eu lieu** : tâche terminée, permission demandée, durée écoulée. Aucun de ceux que j'ai regardés ne lit le transcript pour dire **ce que Claude a répondu**.
+
+C'est la seule chose que fait celui-ci : ouvrir le transcript de la session, extraire le dernier message de l'assistant, et l'afficher.
+
+La différence à l'usage : on décide de revenir au terminal sans avoir à y revenir.
+
 ## Prérequis
 
-- macOS
-- Claude Code (extension VS Code)
+- macOS (Apple Silicon)
+- Claude Code - **CLI, extension VS Code ou n'importe quel terminal**, le hook `Stop` est le même partout
 - Xcode Command Line Tools : `xcode-select --install`
 
 ## Installation
 
 ```bash
 brew tap nicolasclaisse/tap
-brew install claude-code-vscode-notifier
+brew install claude-code-message-notifier
 ```
 
-Le setup configure automatiquement le hook dans `~/.claude/settings.json`.
+Puis ajouter le hook dans `~/.claude/settings.json` :
+
+```json
+{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [{ "type": "command", "command": "/opt/homebrew/opt/claude-code-message-notifier/bin/claude-notifier-hook" }]
+      }
+    ]
+  }
+}
+```
 
 ## Comment ça marche
 
-À chaque fin de réponse, le hook `Stop` de Claude Code lit le transcript de la session et extrait le dernier message assistant pour l'afficher en notification native macOS. Si le message se termine par une question, la notification est préfixée par "Attends ton input".
+À chaque fin de réponse, le hook `Stop` reçoit le chemin du transcript sur son entrée standard, attend que le fichier soit écrit sur disque, puis en extrait le dernier message assistant.
 
-Aucune dépendance externe — uniquement bash, sed et grep natifs macOS.
+Aucune dépendance externe - uniquement bash, sed et grep natifs macOS.
 
 ## Désinstallation
 
 ```bash
-brew uninstall claude-code-vscode-notifier
+brew uninstall claude-code-message-notifier
 ```
 
-Supprimer le bloc `Stop` dans `~/.claude/settings.json`.
+Puis supprimer le bloc `Stop` dans `~/.claude/settings.json`.
+
+## Renommage
+
+Ce projet s'appelait `claude-code-vscode-notifier`. Le `vscode` venait du contexte d'origine et laissait croire à une dépendance à l'éditeur, alors que le hook fonctionne partout où tourne Claude Code. La formule Homebrew déclare l'ancien nom via `oldname` : les installations existantes se mettent à jour sans intervention.
+
+## Licence
+
+MIT
